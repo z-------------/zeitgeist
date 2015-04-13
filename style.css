@@ -9,3 +9,20 @@
     transition-duration: .3s;
     transition-property: none;
 }
+
+body {
+    font-family: "Klima", sans-serif;
+    font-size: 20px;
+    
+    background-color: #ddd;
+    color: #333;
+}
+
+[hidden] {
+    display: none;
+}
+
+h1 {
+    font-size: 3em;
+    color: rgba(0, 0, 0, .5);
+}

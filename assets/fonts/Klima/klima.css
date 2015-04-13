@@ -1,0 +1,17 @@
+@font-face {
+    font-family: "Klima";
+    font-weight: 400;
+    src: local("Klima Regular"), url(klima-regular-web.woff) format("woff");
+}
+
+@font-face {
+    font-family: "Klima";
+    font-weight: 700;
+    src: local("Klima Bold"), url(klima-bold-web.woff) format("woff");
+}
+
+@font-face {
+    font-family: "Klima";
+    font-weight: 900;
+    src: local("Klima Black"), url(klima-black-web.woff) format("woff");
+}
