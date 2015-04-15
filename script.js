@@ -21,19 +21,41 @@ NodeList.prototype.each = function(callback){
     return [].slice.call(this).forEach(callback);
 };
 
-/* define elements */
-
-var editor = {};
-editor.container = document.querySelector(".editor");
-editor.table = editor.container.querySelector(".editor_table");
-editor.saveBtn = editor.container.querySelector(".editor_save");
-
 /* define globals */
 
 var zeit = {};
 zeit.LOCALSTORAGE_VARNAME = "zeitgeist_table";
 
+/* define elements */
+
+var editor = {};
+editor.container = document.querySelector(".editor");
+editor.table = editor.container.querySelector(".editor_week");
+editor.saveBtn = editor.container.querySelector(".editor_save");
+
 /* zeitgeist is go */
+
+if (!localStorage.getItem(zeit.LOCALSTORAGE_VARNAME)) {
+    editor.container.show();
+} else {
+    zeit.table = JSON.parse(localStorage.getItem(zeit.LOCALSTORAGE_VARNAME));
+    console.log(zeit);
+}
+
+/* initialize editor */
+
+for (var d = 0; d < 7; d++) {
+    var dayElem = document.createElement("tr");
+    dayElem.classList.add("editor_day");
+    for (var p = 0; p < 5; p++) {
+        var periodElem = document.createElement("td");
+        periodElem.classList.add("editor_period");
+        periodElem.innerHTML = "<input type='text' class='editor_period_name' placeholder='Period name'>";
+        periodElem.querySelector(".editor_period_name").value = (zeit.table[d].periods[p] ? zeit.table[d].periods[p].name : null);
+        dayElem.appendChild(periodElem);
+    }
+    editor.table.appendChild(dayElem);
+}
 
 editor.saveBtn.addEventListener("click", function(){
     // save table contents into localStorage
@@ -62,23 +84,3 @@ editor.saveBtn.addEventListener("click", function(){
     
     localStorage.setItem(zeit.LOCALSTORAGE_VARNAME, JSON.stringify(table));
 });
-
-if (!localStorage.getItem(zeit.LOCALSTORAGE_VARNAME)) {
-    editor.container.show();
-} else {
-    zeit.table = JSON.parse(localStorage.getItem(zeit.LOCALSTORAGE_VARNAME));
-    console.log(zeit);
-}
-
-/* initialize editor */
-
-for (var d = 0; d < 7; d++) {
-    var dayElem = document.createElement("tr");
-    for (var p = 0; p < 5; p++) {
-        var periodElem = document.createElement("td");
-        periodElem.innerHTML = "<input type='text' class='editor_periodname' placeholder='Period name'>";
-        periodElem.querySelector(".editor_periodname").value = (zeit.table[d].periods[p] ? zeit.table[d].periods[p].name : null);
-        dayElem.appendChild(periodElem);
-    }
-    editor.table.appendChild(dayElem);
-}

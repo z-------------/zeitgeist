@@ -26,3 +26,16 @@ h1 {
     font-size: 3em;
     color: rgba(255, 255, 255, .5);
 }
+
+input {
+    max-width: 100%;
+}
+
+.editor_day, .editor_period {
+    width: 100px;
+    display: inline-block;
+}
+
+.editor_period {
+    width: 100%;
+}
