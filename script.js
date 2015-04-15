@@ -21,6 +21,18 @@ NodeList.prototype.each = function(callback){
     return [].slice.call(this).forEach(callback);
 };
 
+var parseTime = function(str){
+    /* time since start of day. accepts 24 hour time in 23:59 format */
+    var strSplit = str.split(":");
+    
+    var hrInt = strSplit[0];
+    var minInt = strSplit[1];
+    
+    var msInt = hrInt * 60 * 60 * 1000 + minInt * 60 * 1000;
+    
+    return msInt;
+};
+
 /* define globals */
 
 var zeit = {};
