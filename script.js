@@ -50,7 +50,7 @@ time.sinceZero = function(){
 time.stringify = function(ms){
     // returns 24 hour formatted time string
     // ms is time since start of day
-    var dec = (ms / 1000 / 60 / 60).toString();
+    var dec = ms / 1000 / 60 / 60;
     var hr = Math.floor(dec);
     var minDec = dec - hr;
     var min = 60 * minDec;
