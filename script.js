@@ -47,6 +47,16 @@ time.sinceZero = function(){
     );
 };
 
+time.stringify = function(ms){
+    // returns 24 hour formatted time string
+    // ms is time since start of day
+    var dec = (ms / 1000 / 60 / 60).toString();
+    var hr = Math.floor(dec);
+    var minDec = dec - hr;
+    var min = 60 * minDec;
+    return [hr, zpad(min, 2)].join(":");
+};
+
 /* define globals */
 
 var zeit = {};
