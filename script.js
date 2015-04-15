@@ -21,8 +21,12 @@ NodeList.prototype.each = function(callback){
     return [].slice.call(this).forEach(callback);
 };
 
-var parseTime = function(str){
-    /* time since start of day. accepts 24 hour time in 23:59 format */
+/* time functions */
+
+var time = {};
+
+time.parse = function(str){
+    // time since start of day. accepts 24 hour time in 23:59 format
     var strSplit = str.split(":");
     
     var hrInt = strSplit[0];
@@ -31,6 +35,16 @@ var parseTime = function(str){
     var msInt = hrInt * 60 * 60 * 1000 + minInt * 60 * 1000;
     
     return msInt;
+};
+
+time.sinceZero = function(){
+    // returns number in milliseconds since start of day
+    var now = new Date();
+    return (
+        now.getHours() * 60 * 60 * 1000
+        + now.getMinutes() * 60 * 1000
+        + now.getMilliseconds()
+    );
 };
 
 /* define globals */
