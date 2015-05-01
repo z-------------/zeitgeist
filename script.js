@@ -80,43 +80,93 @@ if (!localStorage.getItem(zeit.LOCALSTORAGE_VARNAME)) {
 
 /* initialize editor */
 
-for (var d = 0; d < 7; d++) {
-    var dayElem = document.createElement("tr");
-    dayElem.classList.add("editor_day");
-    for (var p = 0; p < 5; p++) {
-        var periodElem = document.createElement("td");
-        periodElem.classList.add("editor_period");
-        periodElem.innerHTML = "<input type='text' class='editor_period_name' placeholder='Period name'>";
-        periodElem.querySelector(".editor_period_name").value = (zeit.table[d].periods[p] ? zeit.table[d].periods[p].name : null);
-        dayElem.appendChild(periodElem);
+(function(){
+    function setRequired(elem) {
+        var timeElem = elem.querySelector(".editor_period_time");
+        var nameElem = elem.querySelector(".editor_period_name");
+        
+        if (nameElem.value && nameElem.value.length > 0) {
+            timeElem.setAttribute("required", "true");
+        } else {
+            timeElem.removeAttribute("required");
+        }
     }
-    editor.table.appendChild(dayElem);
-}
+    
+    function setTimeMin(elem) {
+        console.log(elem);
+        
+        if (elem) {
+            var dayElem = elem.parentElement;
+            var timeElem = elem.querySelector(".editor_period_time");
+            var nameElem = elem.querySelector(".editor_period_name");
 
-editor.saveBtn.addEventListener("click", function(){
-    // save table contents into localStorage
-    var table = [];
+            var prevPeriod = dayElem.querySelectorAll(".editor_period")[[].slice.call(dayElem.querySelectorAll(".editor_period")).indexOf(elem)-1];
+
+            if (prevPeriod && prevPeriod.querySelector(".editor_period_time").value && prevPeriod.querySelector(".editor_period_time").value.length > 0) {
+                timeElem.setAttribute("min", prevPeriod.querySelector(".editor_period_time").value);
+            } else if (!prevPeriod) {
+                timeElem.value = "07:00";
+            }
+        }
+    }
     
-    var rows = editor.table.querySelectorAll("tr");
-    rows.each(function(row, i){
-        var day = {};
-        day.index = i;
-        day.periods = [];
-        
-        var tds = row.querySelectorAll("td");
-        tds.each(function(elem){
-            var nameInput = elem.querySelector("input");
+    for (var d = 0; d < 7; d++) {
+        var dayElem = document.createElement("tr");
+        dayElem.classList.add("editor_day");
+        for (var p = 0; p < 5; p++) {
+            var periodElem = document.createElement("td");
+            periodElem.classList.add("editor_period");
+            periodElem.innerHTML = "<input type='text' class='editor_period_name' placeholder='Period name'>\
+    <input type='time' class='editor_period_time'>";
+
+            periodElem.querySelector(".editor_period_name").value = (zeit.table[d].periods[p] ? zeit.table[d].periods[p].name : null);
+
+            periodElem.querySelector(".editor_period_name").addEventListener("change", function(){
+                setRequired(this.parentElement);
+            });
             
-            var period = {
-                time: "00:00",
-                name: nameInput.value
-            };
+            periodElem.querySelector(".editor_period_time").addEventListener("change", function(){
+                setTimeMin(this.parentElement.parentElement.children[[].slice.call(this.parentElement.parentElement.children).indexOf(this.parentElement) + 1]);
+            });
+
+            dayElem.appendChild(periodElem);
             
-            day.periods.push(period);
+            setRequired(periodElem);
+            setTimeMin(periodElem);
+        }
+        editor.table.appendChild(dayElem);
+    }
+})();
+
+editor.container.addEventListener("submit", function(e){
+    e.preventDefault();
+    
+    if (editor.container.checkValidity()) {
+        // save table contents into localStorage
+        var table = [];
+
+        var rows = editor.table.querySelectorAll("tr");
+        rows.each(function(row, i){
+            var day = {};
+            day.index = i;
+            day.periods = [];
+
+            var tds = row.querySelectorAll("td");
+            tds.each(function(elem){
+                var nameInput = elem.querySelector(".editor_period_name");
+                var timeInput = elem.querySelector(".editor_period_time");
+
+                var period = {
+                    time: timeInput.value,
+                    name: nameInput.value
+                };
+
+                day.periods.push(period);
+            });
+
+            table.push(day);
         });
-        
-        table.push(day);
-    });
-    
-    localStorage.setItem(zeit.LOCALSTORAGE_VARNAME, JSON.stringify(table));
+
+        localStorage.setItem(zeit.LOCALSTORAGE_VARNAME, JSON.stringify(table));
+    }
 });

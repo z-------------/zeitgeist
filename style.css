@@ -32,7 +32,7 @@ input {
 }
 
 .editor_day, .editor_period {
-    width: 100px;
+    width: 150px;
     display: inline-block;
 }
 
