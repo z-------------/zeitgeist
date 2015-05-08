@@ -66,3 +66,16 @@ input {
 .editor_week {
     margin: 30px 0;
 }
+
+.editor_day_name {
+    cursor: pointer;
+}
+
+.editor_day.disabled .editor_period {
+    color: transparent;
+    pointer-events: none;
+}
+
+.editor_day.disabled .editor_day_name {
+    text-decoration: line-through;
+}

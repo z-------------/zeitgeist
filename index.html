@@ -8,13 +8,28 @@
     </head>
     <body>
         <h1>zeitgeist</h1>
-        <form class="editor">
+        
+        <div class="display">
+            <div class="display_prev">
+                <div class="display_name"></div>
+            </div>
+            <div class="display_now">
+                <div class="display_name"></div>
+            </div>
+            <div class="display_next">
+                <div class="display_name"></div>
+            </div>
+            <button class="display_open_config">Settings</button>
+        </div>
+        
+        <form class="editor" hidden>
             <div><span>It is now Week <input type="number" class="editor_weeknow" min="1">.</span></div>
             <div class="editor_tables"></div>
             <button class="editor_save">Save</button>
             <button class="editor_add_week">+ week</button>
         </form>
         
+        <script src="/assets/js/date.js"></script>
         <script src="script.js"></script>
     </body>
 </html>

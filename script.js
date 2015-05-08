@@ -69,7 +69,6 @@ var zeit = {
 
 zeit.LOCALSTORAGE_VARNAME = "zeitgeist_table";
 zeit.DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-zeit.DEFAULT_START_TIME = "07:00";
 
 zeit.getWeek = function() {
     var then = zeit.lastSave.time;
@@ -80,38 +79,27 @@ zeit.getWeek = function() {
     return max(weeks + 1, zeit.config.table.length) - 1;
 };
 
-zeit.saveTable = function() {
-    var table = [];
-        
-    var weeks = editor.tables.querySelectorAll(".editor_week");
-    weeks.each(function(weekElem){
-        console.log(weekElem);
-        var week = [];
-        var rows = weekElem.querySelectorAll(".editor_day");
-        rows.each(function(row, i){
-            var day = {};
-            day.index = i;
-            day.periods = [];
-
-            var tds = row.querySelectorAll(".editor_period");
-            tds.each(function(elem){
-                var nameInput = elem.querySelector(".editor_period_name");
-                var timeInput = elem.querySelector(".editor_period_time");
-
-                var period = {
-                    time: timeInput.value,
-                    name: nameInput.value
-                };
-
-                day.periods.push(period);
-            });
-
-            week.push(day);
-        });
-        table.push(week);
-    });
-
-    localStorage.setItem(zeit.LOCALSTORAGE_VARNAME, JSON.stringify(table));
+zeit.getPeriod = function() {
+    var now = new Date();
+    var nowTime = now.getHours() * 60 * 60 * 1000 + now.getMinutes() * 60 * 1000;
+    
+    var result = null;
+    
+    var week = zeit.config.table[zeit.getWeek()];
+    var day = week[now.getDay()];
+    
+    var i = day.periods.length - 1;
+    while (i >= 0 && !result) {
+        var period = day.periods[i];
+        var timeArr = period.time.split(":");
+        var time = timeArr[0] * 60 * 60 * 1000 + timeArr[1] * 60 * 1000;
+        if (nowTime >= time) {
+            result = period;
+        }
+        i--;
+    }
+    
+    return result;
 };
 
 /* define elements */
@@ -123,6 +111,14 @@ editor.saveBtn = editor.container.querySelector(".editor_save");
 editor.addWeekBtn = editor.container.querySelector(".editor_add_week");
 editor.weekInput = editor.container.querySelector(".editor_weeknow");
 
+var display = {};
+display.container = document.querySelector(".display");
+display.now = {};
+display.now.container = display.container.querySelector(".display_now");
+display.now.name = display.now.container.querySelector(".display_name");
+
+display.configBtn = display.container.querySelector(".display_open_config");
+
 /* zeitgeist is go */
 
 if (!localStorage.getItem(zeit.LOCALSTORAGE_VARNAME)) {
@@ -130,6 +126,10 @@ if (!localStorage.getItem(zeit.LOCALSTORAGE_VARNAME)) {
 } else {
     zeit.config.table = JSON.parse(localStorage.getItem(zeit.LOCALSTORAGE_VARNAME));
     console.log(zeit);
+    
+    setInterval(function(){
+        display.now.name.textContent = zeit.getPeriod().name;
+    }, 1000);
 }
 
 if (localStorage.getItem("zeitgeist_last_save")) {
@@ -175,8 +175,9 @@ if (localStorage.getItem("zeitgeist_last_save")) {
         for (var d = 0; d < 7; d++) {
             var dayElem = document.createElement("tr");
             dayElem.classList.add("editor_day");
+            if (zeit.config.table && zeit.config.table[w][d].disabled) dayElem.classList.add("disabled");
 
-            dayElem.innerHTML += "<td>" + zeit.DAY_NAMES[d] + "</td>";
+            dayElem.innerHTML += "<td class='editor_day_name'>" + zeit.DAY_NAMES[d] + "</td>";
 
             for (var p = 0; p < (zeit.config.table && zeit.config.table[w] && zeit.config.table[w][d] ? zeit.config.table[w][d].periods.length : 5); p++) {
                 var periodElem = document.createElement("td");
@@ -206,8 +207,6 @@ if (localStorage.getItem("zeitgeist_last_save")) {
         } else if (input.classList.contains("editor_period_time")) {
             console.log("time changed");
             setTimeMin(parent.parentElement.children[[].slice.call(parent.parentElement.children).indexOf(parent) + 1]);
-        } else {
-            console.log("not applicable", input);
         }
     });
     
@@ -217,7 +216,9 @@ if (localStorage.getItem("zeitgeist_last_save")) {
 
         if (input.classList.contains("editor_week_remove")) {
             parent.parentElement.parentElement.removeChild(parent.parentElement);
-        } 
+        } else if (input.classList.contains("editor_day_name")) {
+            parent.classList.toggle("disabled");
+        }
     })
 })();
 
@@ -226,7 +227,41 @@ editor.container.addEventListener("submit", function(e){
     
     if (editor.container.checkValidity()) {
         console.log("table valid, saving");
-        zeit.saveTable();
+        
+        (function(){
+            var table = [];
+        
+            var weeks = editor.tables.querySelectorAll(".editor_week");
+            weeks.each(function(weekElem){
+                console.log(weekElem);
+                var week = [];
+                var rows = weekElem.querySelectorAll(".editor_day");
+                rows.each(function(row, i){
+                    var day = {};
+                    day.index = i;
+                    day.periods = [];
+                    day.disabled = row.classList.contains("disabled");
+
+                    var tds = row.querySelectorAll(".editor_period");
+                    tds.each(function(elem){
+                        var nameInput = elem.querySelector(".editor_period_name");
+                        var timeInput = elem.querySelector(".editor_period_time");
+
+                        var period = {
+                            time: timeInput.value,
+                            name: nameInput.value
+                        };
+
+                        day.periods.push(period);
+                    });
+
+                    week.push(day);
+                });
+                table.push(week);
+            });
+
+            localStorage.setItem(zeit.LOCALSTORAGE_VARNAME, JSON.stringify(table));
+        })();
         
         zeit.lastSave = {
             time: new Date(),
@@ -253,3 +288,7 @@ try {
 } catch (e) {
     editor.weekInput.value = 1;
 }
+
+display.configBtn.addEventListener("click", function(){
+    editor.container.show();
+});
