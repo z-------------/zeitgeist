@@ -1,17 +1,39 @@
 @font-face {
     font-family: "Klima";
     font-weight: 400;
+    font-style: italic;
+    src: local("Klima Italic"), url(klima-regular-italic-web.woff) format("woff");
+}
+
+@font-face {
+    font-family: "Klima";
+    font-weight: 700;
+    src: local("Klima Bold Italic"), url(klima-bold-italic-web.woff) format("woff");
+}
+
+@font-face {
+    font-family: "Klima";
+    font-weight: 900;
+    src: local("Klima Black Italic"), url(klima-black-italic-web.woff) format("woff");
+}
+
+@font-face {
+    font-family: "Klima";
+    font-weight: 400;
+    font-style: normal;
     src: local("Klima Regular"), url(klima-regular-web.woff) format("woff");
 }
 
 @font-face {
     font-family: "Klima";
     font-weight: 700;
+    font-style: normal;
     src: local("Klima Bold"), url(klima-bold-web.woff) format("woff");
 }
 
 @font-face {
     font-family: "Klima";
     font-weight: 900;
+    font-style: normal;
     src: local("Klima Black"), url(klima-black-web.woff) format("woff");
 }
