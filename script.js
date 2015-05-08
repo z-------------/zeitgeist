@@ -71,6 +71,15 @@ zeit.LOCALSTORAGE_VARNAME = "zeitgeist_table";
 zeit.DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 zeit.DEFAULT_START_TIME = "07:00";
 
+zeit.getWeek = function() {
+    var then = zeit.lastSave.time;
+    var thenWeek = zeit.lastSave.week;
+    var now = new Date();
+    var delta = (now - then)/1000/60/60/24;
+    var weeks = Math.floor((delta + then.getDay()) / 7) + thenWeek;
+    return max(weeks + 1, zeit.config.table.length) - 1;
+};
+
 zeit.saveTable = function() {
     var table = [];
         
@@ -112,6 +121,7 @@ editor.container = document.querySelector(".editor");
 editor.tables = editor.container.querySelector(".editor_tables");
 editor.saveBtn = editor.container.querySelector(".editor_save");
 editor.addWeekBtn = editor.container.querySelector(".editor_add_week");
+editor.weekInput = editor.container.querySelector(".editor_weeknow");
 
 /* zeitgeist is go */
 
@@ -120,6 +130,11 @@ if (!localStorage.getItem(zeit.LOCALSTORAGE_VARNAME)) {
 } else {
     zeit.config.table = JSON.parse(localStorage.getItem(zeit.LOCALSTORAGE_VARNAME));
     console.log(zeit);
+}
+
+if (localStorage.getItem("zeitgeist_last_save")) {
+    zeit.lastSave = JSON.parse(localStorage.getItem("zeitgeist_last_save"));
+    zeit.lastSave.time = new Date(zeit.lastSave.time);
 }
 
 /* initialize editor */
@@ -155,6 +170,8 @@ if (!localStorage.getItem(zeit.LOCALSTORAGE_VARNAME)) {
         var weekElem = document.createElement("table");
         weekElem.classList.add("editor_week");
         
+        weekElem.innerHTML += "<div class='editor_week_header'><h3>Week " + (w + 1) + "</h3><button class='editor_week_remove'>remove</button></div>";
+        
         for (var d = 0; d < 7; d++) {
             var dayElem = document.createElement("tr");
             dayElem.classList.add("editor_day");
@@ -177,23 +194,31 @@ if (!localStorage.getItem(zeit.LOCALSTORAGE_VARNAME)) {
             }
             weekElem.appendChild(dayElem);
         }
-        
-        editor.tables.addEventListener("input", function(e){
-            var input = e.srcElement;
-            var periodElem = input.parentElement;
-            
-            if (input.classList.contains("editor_period_name")) {
-                setRequired(periodElem);
-            } else if (input.classList.contains("editor_period_time")) {
-                console.log("time changed");
-                setTimeMin(periodElem.parentElement.children[[].slice.call(periodElem.parentElement.children).indexOf(periodElem) + 1]);
-            } else {
-                console.log("not applicable", input);
-            }
-        });
-        
         editor.tables.appendChild(weekElem);
     }
+    
+    editor.tables.addEventListener("input", function(e){
+        var input = e.srcElement;
+        var parent = input.parentElement;
+
+        if (input.classList.contains("editor_period_name")) {
+            setRequired(periodElem);
+        } else if (input.classList.contains("editor_period_time")) {
+            console.log("time changed");
+            setTimeMin(parent.parentElement.children[[].slice.call(parent.parentElement.children).indexOf(parent) + 1]);
+        } else {
+            console.log("not applicable", input);
+        }
+    });
+    
+    editor.tables.addEventListener("click", function(e){
+        var input = e.srcElement;
+        var parent = input.parentElement;
+
+        if (input.classList.contains("editor_week_remove")) {
+            parent.parentElement.parentElement.removeChild(parent.parentElement);
+        } 
+    })
 })();
 
 editor.container.addEventListener("submit", function(e){
@@ -202,6 +227,13 @@ editor.container.addEventListener("submit", function(e){
     if (editor.container.checkValidity()) {
         console.log("table valid, saving");
         zeit.saveTable();
+        
+        zeit.lastSave = {
+            time: new Date(),
+            week: Number(editor.weekInput.value) - 1 || 0
+        };
+        localStorage.setItem("zeitgeist_last_save", JSON.stringify(zeit.lastSave));
+        
         console.log("saved");
     } else {
         console.log("table not valid");
@@ -215,3 +247,9 @@ editor.addWeekBtn.addEventListener("click", function(){
         elem.value = elem.value;
     });
 });
+
+try {
+    editor.weekInput.value = zeit.getWeek() + 1;
+} catch (e) {
+    editor.weekInput.value = 1;
+}
