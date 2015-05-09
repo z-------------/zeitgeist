@@ -9,6 +9,20 @@
     <body>
         <h1>zeitgeist</h1>
         
+        <!-- templates -->
+        <template data-name="weekHeader">
+            <div class="editor_week_header">
+                <h3>Week {weekNo}</h3>
+                <button class="editor_week_remove">remove</button>
+            </div>
+        </template>
+        
+        <template data-name="periodInput">
+            <input type="text" class="editor_period_name" placeholder="Name">
+            <input type="time" class="editor_period_time">
+        </template>
+        <!-- end templates -->
+        
         <div class="display">
             <div class="display_prev">
                 <div class="display_name"></div>

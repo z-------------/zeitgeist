@@ -102,6 +102,21 @@ zeit.getPeriod = function() {
     return result;
 };
 
+/* template function */
+
+var template = {};
+template.make = function(name, vars) {
+    var html = document.querySelector("template[data-name='" + name + "']").innerHTML;
+    if (html) {
+        var keys = (vars ? Object.keys(vars) : []);
+        keys.forEach(function(key){
+            html = html.replace(new RegExp("{" + key + "}", "g"), vars[key].toString());
+        });
+        return html;
+    }
+    return null;
+};
+
 /* define elements */
 
 var editor = {};
@@ -116,7 +131,6 @@ display.container = document.querySelector(".display");
 display.now = {};
 display.now.container = display.container.querySelector(".display_now");
 display.now.name = display.now.container.querySelector(".display_name");
-
 display.configBtn = display.container.querySelector(".display_open_config");
 
 /* zeitgeist is go */
@@ -170,7 +184,9 @@ if (localStorage.getItem("zeitgeist_last_save")) {
         var weekElem = document.createElement("table");
         weekElem.classList.add("editor_week");
         
-        weekElem.innerHTML += "<div class='editor_week_header'><h3>Week " + (w + 1) + "</h3><button class='editor_week_remove'>remove</button></div>";
+        weekElem.innerHTML += template.make("weekHeader", {
+            weekNo: w + 1
+        });
         
         for (var d = 0; d < 7; d++) {
             var dayElem = document.createElement("tr");
@@ -182,8 +198,7 @@ if (localStorage.getItem("zeitgeist_last_save")) {
             for (var p = 0; p < (zeit.config.table && zeit.config.table[w] && zeit.config.table[w][d] ? zeit.config.table[w][d].periods.length : 5); p++) {
                 var periodElem = document.createElement("td");
                 periodElem.classList.add("editor_period");
-                periodElem.innerHTML = "<input type='text' class='editor_period_name' placeholder='Period name'>\
-        <input type='time' class='editor_period_time'>";
+                periodElem.innerHTML = template.make("periodInput");
 
                 periodElem.querySelector(".editor_period_name").value = (zeit.config.table && zeit.config.table[w][d].periods[p] ? zeit.config.table[w][d].periods[p].name : "" + d + p);
                 periodElem.querySelector(".editor_period_time").value = (zeit.config.table && zeit.config.table[w][d].periods[p] ? zeit.config.table[w][d].periods[p].time : null);
@@ -216,79 +231,89 @@ if (localStorage.getItem("zeitgeist_last_save")) {
 
         if (input.classList.contains("editor_week_remove")) {
             parent.parentElement.parentElement.removeChild(parent.parentElement);
+            
+            var weekElemHeaders = editor.container.querySelectorAll(".editor_week_header");
+            weekElemHeaders.each(function(elem, w){
+                elem.outerHTML = template.make("weekHeader", {
+                    weekNo: w + 1
+                });
+            });
         } else if (input.classList.contains("editor_day_name")) {
             parent.classList.toggle("disabled");
         }
-    })
-})();
-
-editor.container.addEventListener("submit", function(e){
-    e.preventDefault();
-    
-    if (editor.container.checkValidity()) {
-        console.log("table valid, saving");
-        
-        (function(){
-            var table = [];
-        
-            var weeks = editor.tables.querySelectorAll(".editor_week");
-            weeks.each(function(weekElem){
-                console.log(weekElem);
-                var week = [];
-                var rows = weekElem.querySelectorAll(".editor_day");
-                rows.each(function(row, i){
-                    var day = {};
-                    day.index = i;
-                    day.periods = [];
-                    day.disabled = row.classList.contains("disabled");
-
-                    var tds = row.querySelectorAll(".editor_period");
-                    tds.each(function(elem){
-                        var nameInput = elem.querySelector(".editor_period_name");
-                        var timeInput = elem.querySelector(".editor_period_time");
-
-                        var period = {
-                            time: timeInput.value,
-                            name: nameInput.value
-                        };
-
-                        day.periods.push(period);
-                    });
-
-                    week.push(day);
-                });
-                table.push(week);
-            });
-
-            localStorage.setItem(zeit.LOCALSTORAGE_VARNAME, JSON.stringify(table));
-        })();
-        
-        zeit.lastSave = {
-            time: new Date(),
-            week: Number(editor.weekInput.value) - 1 || 0
-        };
-        localStorage.setItem("zeitgeist_last_save", JSON.stringify(zeit.lastSave));
-        
-        console.log("saved");
-    } else {
-        console.log("table not valid");
-    }
-});
-
-editor.addWeekBtn.addEventListener("click", function(){
-    var cloned = editor.tables.children[editor.tables.children.length - 1].cloneNode(true);
-    editor.tables.appendChild(cloned);
-    cloned.querySelectorAll("input").each(function(elem){
-        elem.value = elem.value;
     });
-});
+    
+    editor.container.addEventListener("submit", function(e){
+        e.preventDefault();
 
-try {
-    editor.weekInput.value = zeit.getWeek() + 1;
-} catch (e) {
-    editor.weekInput.value = 1;
-}
+        if (editor.container.checkValidity()) {
+            console.log("table valid, saving");
 
-display.configBtn.addEventListener("click", function(){
-    editor.container.show();
-});
+            (function(){
+                var table = [];
+
+                var weeks = editor.tables.querySelectorAll(".editor_week");
+                weeks.each(function(weekElem){
+                    console.log(weekElem);
+                    var week = [];
+                    var rows = weekElem.querySelectorAll(".editor_day");
+                    rows.each(function(row, i){
+                        var day = {};
+                        day.index = i;
+                        day.periods = [];
+                        day.disabled = row.classList.contains("disabled");
+
+                        var tds = row.querySelectorAll(".editor_period");
+                        tds.each(function(elem){
+                            var nameInput = elem.querySelector(".editor_period_name");
+                            var timeInput = elem.querySelector(".editor_period_time");
+
+                            var period = {
+                                time: timeInput.value,
+                                name: nameInput.value
+                            };
+
+                            day.periods.push(period);
+                        });
+
+                        week.push(day);
+                    });
+                    table.push(week);
+                });
+
+                localStorage.setItem(zeit.LOCALSTORAGE_VARNAME, JSON.stringify(table));
+            })();
+
+            zeit.lastSave = {
+                time: new Date(),
+                week: Number(editor.weekInput.value) - 1 || 0
+            };
+            localStorage.setItem("zeitgeist_last_save", JSON.stringify(zeit.lastSave));
+
+            console.log("saved");
+        } else {
+            console.log("table not valid");
+        }
+    });
+
+    editor.addWeekBtn.addEventListener("click", function(){
+        var cloned = editor.tables.children[editor.tables.children.length - 1].cloneNode(true);
+        editor.tables.appendChild(cloned);
+        cloned.querySelectorAll("input").each(function(elem){
+            elem.value = elem.value;
+        });
+        cloned.querySelector(".editor_week_header").outerHTML = template.make("weekHeader", {
+            weekNo: editor.tables.children.length
+        });
+    });
+
+    try {
+        editor.weekInput.value = zeit.getWeek() + 1;
+    } catch (e) {
+        editor.weekInput.value = 1;
+    }
+
+    display.configBtn.addEventListener("click", function(){
+        editor.container.show();
+    });
+})();
