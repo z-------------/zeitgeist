@@ -41,12 +41,13 @@ time.parse = function(str){
     return msInt;
 };
 
-time.sinceZero = function(){
+time.sinceZero = function(date){
     // returns number in milliseconds since start of day
-    var now = new Date();
+    var now = date || new Date();
     return (
         now.getHours() * 60 * 60 * 1000
         + now.getMinutes() * 60 * 1000
+        + now.getSeconds() * 1000
         + now.getMilliseconds()
     );
 };
@@ -81,25 +82,30 @@ zeit.getWeek = function() {
 
 zeit.getPeriod = function() {
     var now = new Date();
-    var nowTime = now.getHours() * 60 * 60 * 1000 + now.getMinutes() * 60 * 1000;
+    var nowTime = now.getHours() * 60 * 60 * 1000
+        + now.getMinutes() * 60 * 1000
+        + now.getSeconds() * 1000
+        + now.getMilliseconds();
     
     var result = null;
     
     var week = zeit.config.table[zeit.getWeek()];
     var day = week[now.getDay()];
     
-    var i = day.periods.length - 1;
-    while (i >= 0 && !result) {
-        var period = day.periods[i];
-        var timeArr = period.time.split(":");
-        var time = timeArr[0] * 60 * 60 * 1000 + timeArr[1] * 60 * 1000;
-        if (nowTime >= time) {
-            result = period;
+    if (!day.disabled) {
+        var i = day.periods.length - 1;
+        while (i >= 0 && !result) {
+            var period = day.periods[i];
+            var timeArr = period.time.split(":");
+            var time = timeArr[0] * 60 * 60 * 1000 + timeArr[1] * 60 * 1000;
+            if (nowTime >= time) {
+                result = period;
+            }
+            i--;
         }
-        i--;
+        return result;
     }
-    
-    return result;
+    return null;
 };
 
 /* template function */
@@ -142,7 +148,7 @@ if (!localStorage.getItem(zeit.LOCALSTORAGE_VARNAME)) {
     console.log(zeit);
     
     setInterval(function(){
-        display.now.name.textContent = zeit.getPeriod().name;
+        display.now.name.textContent = zeit.getPeriod() ? zeit.getPeriod().name : "nothing";
     }, 1000);
 }
 
