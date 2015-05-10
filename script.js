@@ -87,8 +87,6 @@ zeit.getPeriod = function() {
         + now.getSeconds() * 1000
         + now.getMilliseconds();
     
-    var result = null;
-    
     var week = zeit.config.table[zeit.getWeek()];
     var day = week[now.getDay()];
     
@@ -99,11 +97,13 @@ zeit.getPeriod = function() {
             var timeArr = period.time.split(":");
             var time = timeArr[0] * 60 * 60 * 1000 + timeArr[1] * 60 * 1000;
             if (nowTime >= time) {
-                result = period;
+                if (period.enable) {
+                    return period;
+                }
+                return null;
             }
             i--;
         }
-        return result;
     }
     return null;
 };
@@ -208,6 +208,11 @@ if (localStorage.getItem("zeitgeist_last_save")) {
 
                 periodElem.querySelector(".editor_period_name").value = (zeit.config.table && zeit.config.table[w][d].periods[p] ? zeit.config.table[w][d].periods[p].name : "" + d + p);
                 periodElem.querySelector(".editor_period_time").value = (zeit.config.table && zeit.config.table[w][d].periods[p] ? zeit.config.table[w][d].periods[p].time : null);
+                if (zeit.config.table && zeit.config.table[w][d].periods[p] && zeit.config.table[w][d].periods[p].enable === false) {
+                    periodElem.querySelector(".editor_period_enable").checked = false;
+                } else {
+                    periodElem.querySelector(".editor_period_enable").checked = true;
+                }
 
                 dayElem.appendChild(periodElem);
 
@@ -273,10 +278,12 @@ if (localStorage.getItem("zeitgeist_last_save")) {
                         tds.each(function(elem){
                             var nameInput = elem.querySelector(".editor_period_name");
                             var timeInput = elem.querySelector(".editor_period_time");
+                            var enableInput = elem.querySelector(".editor_period_enable");
 
                             var period = {
                                 time: timeInput.value,
-                                name: nameInput.value
+                                name: nameInput.value,
+                                enable: enableInput.checked
                             };
 
                             day.periods.push(period);

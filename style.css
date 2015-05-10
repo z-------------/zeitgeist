@@ -17,6 +17,8 @@ body {
     font-family: "Klima", sans-serif;
     font-size: 20px;
     
+    padding: 100px;
+    
     background-color: #222;
     color: #ddd;
 }
@@ -51,7 +53,7 @@ input {
     border-top: solid 2px rgba(255, 255, 255, .5);
 }
 
-.editor_period input {
+.editor_period input:not([type="checkbox"]) {
     display: block;
     margin: 2px;
     padding: 0 5px;
@@ -76,6 +78,19 @@ input {
     pointer-events: none;
 }
 
+.editor_day.disabled .editor_period > * {
+    opacity: 0;
+}
+
 .editor_day.disabled .editor_day_name {
     text-decoration: line-through;
+}
+
+.display_now {
+    font-size: 3em;
+}
+
+.display_prev, .display_next {
+    font-size: 1.5em;
+    color: rgba(255, 255, 255, .5);
 }
