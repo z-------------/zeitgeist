@@ -32,12 +32,12 @@ var time = {};
 time.parse = function(str){
     // time since start of day. accepts 24 hour time in 23:59 format
     var strSplit = str.split(":");
-    
+
     var hrInt = strSplit[0];
     var minInt = strSplit[1];
-    
+
     var msInt = hrInt * 60 * 60 * 1000 + minInt * 60 * 1000;
-    
+
     return msInt;
 };
 
@@ -86,13 +86,13 @@ zeit.getPeriod = function() {
         + now.getMinutes() * 60 * 1000
         + now.getSeconds() * 1000
         + now.getMilliseconds();
-    
+
     var week = zeit.config.table[zeit.getWeek()];
     var day = week[now.getDay()];
-    
+
     if (!day.disabled) {
         var i = day.periods.length - 1;
-        while (i >= 0 && !result) {
+        while (i >= 0) {
             var period = day.periods[i];
             var timeArr = period.time.split(":");
             var time = timeArr[0] * 60 * 60 * 1000 + timeArr[1] * 60 * 1000;
@@ -146,7 +146,7 @@ if (!localStorage.getItem(zeit.LOCALSTORAGE_VARNAME)) {
 } else {
     zeit.config.table = JSON.parse(localStorage.getItem(zeit.LOCALSTORAGE_VARNAME));
     console.log(zeit);
-    
+
     setInterval(function(){
         display.now.name.textContent = zeit.getPeriod() ? zeit.getPeriod().name : "nothing";
     }, 1000);
@@ -163,14 +163,14 @@ if (localStorage.getItem("zeitgeist_last_save")) {
     function setRequired(elem) {
         var timeElem = elem.querySelector(".editor_period_time");
         var nameElem = elem.querySelector(".editor_period_name");
-        
+
         if (nameElem.value && nameElem.value.length > 0) {
             timeElem.setAttribute("required", "true");
         } else {
             timeElem.removeAttribute("required");
         }
     }
-    
+
     function setTimeMin(elem) {
         console.log(elem);
         if (elem) {
@@ -185,15 +185,15 @@ if (localStorage.getItem("zeitgeist_last_save")) {
             }
         }
     }
-    
+
     for (var w = 0; w < (zeit.config.table && zeit.config.table.length ? zeit.config.table.length : 1); w++) {
         var weekElem = document.createElement("table");
         weekElem.classList.add("editor_week");
-        
+
         weekElem.innerHTML += template.make("weekHeader", {
             weekNo: w + 1
         });
-        
+
         for (var d = 0; d < 7; d++) {
             var dayElem = document.createElement("tr");
             dayElem.classList.add("editor_day");
@@ -223,7 +223,7 @@ if (localStorage.getItem("zeitgeist_last_save")) {
         }
         editor.tables.appendChild(weekElem);
     }
-    
+
     editor.tables.addEventListener("input", function(e){
         var input = e.srcElement;
         var parent = input.parentElement;
@@ -235,14 +235,14 @@ if (localStorage.getItem("zeitgeist_last_save")) {
             setTimeMin(parent.parentElement.children[[].slice.call(parent.parentElement.children).indexOf(parent) + 1]);
         }
     });
-    
+
     editor.tables.addEventListener("click", function(e){
         var input = e.srcElement;
         var parent = input.parentElement;
 
         if (input.classList.contains("editor_week_remove")) {
             parent.parentElement.parentElement.removeChild(parent.parentElement);
-            
+
             var weekElemHeaders = editor.container.querySelectorAll(".editor_week_header");
             weekElemHeaders.each(function(elem, w){
                 elem.outerHTML = template.make("weekHeader", {
@@ -253,7 +253,7 @@ if (localStorage.getItem("zeitgeist_last_save")) {
             parent.classList.toggle("disabled");
         }
     });
-    
+
     editor.container.addEventListener("submit", function(e){
         e.preventDefault();
 
