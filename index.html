@@ -8,22 +8,22 @@
     </head>
     <body>
         <h1>zeitgeist</h1>
-        
-        <!-- templates -->
-        <template data-name="weekHeader">
-            <div class="editor_week_header">
-                <h3>Week {weekNo}</h3>
-                <button class="editor_week_remove">remove</button>
-            </div>
-        </template>
-        
-        <template data-name="periodInput">
-            <input type="text" class="editor_period_name" placeholder="Name">
-            <input type="time" class="editor_period_time">
-            <label><input type="checkbox" class="editor_period_enable"></label>
-        </template>
-        <!-- end templates -->
-        
+
+        <div id="templates">
+            <template data-name="weekHeader">
+                <div class="editor_week_header">
+                    <h3>Week {weekNo}</h3>
+                    <button class="editor_week_remove">remove</button>
+                </div>
+            </template>
+
+            <template data-name="periodInput">
+                <input type="text" class="editor_period_name" placeholder="Name">
+                <input type="time" class="editor_period_time">
+                <label><input type="checkbox" class="editor_period_enable"></label>
+            </template>
+        </div>
+
         <div class="display">
             <div class="display_prev">
                 <div class="display_name"></div>
@@ -36,14 +36,14 @@
             </div>
             <button class="display_open_config">Settings</button>
         </div>
-        
+
         <form class="editor" hidden>
             <div><span>It is now Week <input type="number" class="editor_weeknow" min="1">.</span></div>
             <div class="editor_tables"></div>
             <button class="editor_save">Save</button>
             <button class="editor_add_week">+ week</button>
         </form>
-        
+
         <script src="script.js"></script>
     </body>
 </html>
