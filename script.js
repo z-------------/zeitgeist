@@ -70,6 +70,13 @@ var zeit = {
 
 zeit.LOCALSTORAGE_VARNAME = "zeitgeist_table";
 zeit.DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+zeit.PERIOD_TIMES = [
+    "8:40", "9:47",
+    "10:50",
+    "11:15",
+    "12:18",
+    "1:10", "2:18"
+];
 
 zeit.getWeek = function() {
     var then = zeit.lastSave.time;
@@ -160,31 +167,31 @@ if (localStorage.getItem("zeitgeist_last_save")) {
 /* initialize editor */
 
 (function(){
-    function setRequired(elem) {
-        var timeElem = elem.querySelector(".editor_period_time");
-        var nameElem = elem.querySelector(".editor_period_name");
-
-        if (nameElem.value && nameElem.value.length > 0) {
-            timeElem.setAttribute("required", "true");
-        } else {
-            timeElem.removeAttribute("required");
-        }
-    }
-
-    function setTimeMin(elem) {
-        console.log(elem);
-        if (elem) {
-            var dayElem = elem.parentElement;
-            var timeElem = elem.querySelector(".editor_period_time");
-            var nameElem = elem.querySelector(".editor_period_name");
-
-            var prevPeriod = dayElem.querySelectorAll(".editor_period")[[].slice.call(dayElem.querySelectorAll(".editor_period")).indexOf(elem)-1];
-
-            if (prevPeriod && prevPeriod.querySelector(".editor_period_time").value && prevPeriod.querySelector(".editor_period_time").value.length > 0) {
-                timeElem.setAttribute("min", prevPeriod.querySelector(".editor_period_time").value);
-            }
-        }
-    }
+    // function setRequired(elem) {
+    //     var timeElem = elem.querySelector(".editor_period_time");
+    //     var nameElem = elem.querySelector(".editor_period_name");
+    //
+    //     if (nameElem.value && nameElem.value.length > 0) {
+    //         timeElem.setAttribute("required", "true");
+    //     } else {
+    //         timeElem.removeAttribute("required");
+    //     }
+    // }
+    //
+    // function setTimeMin(elem) {
+    //     console.log(elem);
+    //     if (elem) {
+    //         var dayElem = elem.parentElement;
+    //         var timeElem = elem.querySelector(".editor_period_time");
+    //         var nameElem = elem.querySelector(".editor_period_name");
+    //
+    //         var prevPeriod = dayElem.querySelectorAll(".editor_period")[[].slice.call(dayElem.querySelectorAll(".editor_period")).indexOf(elem)-1];
+    //
+    //         if (prevPeriod && prevPeriod.querySelector(".editor_period_time").value && prevPeriod.querySelector(".editor_period_time").value.length > 0) {
+    //             timeElem.setAttribute("min", prevPeriod.querySelector(".editor_period_time").value);
+    //         }
+    //     }
+    // }
 
     for (var w = 0; w < (zeit.config.table && zeit.config.table.length ? zeit.config.table.length : 1); w++) {
         var weekElem = document.createElement("table");
@@ -194,10 +201,22 @@ if (localStorage.getItem("zeitgeist_last_save")) {
             weekNo: w + 1
         });
 
+        var timesElem = document.createElement("tr");
+        timesElem.classList.add("editor_times");
+        for (var p = 0; p < (zeit.config.table && zeit.config.table[w] && zeit.config.table[w][d] ? zeit.config.table[w][d].periods.length : 5); p++) {
+            var timeElem = document.createElement("td");
+            timeElem.classList.add("editor_time");
+            timeElem.textContent = zeit.PERIOD_TIMES[p];
+            timesElem.appendChild(timeElem);
+        }
+        weekElem.appendChild(timesElem);
+
         for (var d = 0; d < 7; d++) {
             var dayElem = document.createElement("tr");
             dayElem.classList.add("editor_day");
-            if (zeit.config.table && zeit.config.table[w][d].disabled) dayElem.classList.add("disabled");
+            if (zeit.config.table && zeit.config.table[w][d].disabled) {
+                dayElem.classList.add("disabled");
+            }
 
             dayElem.innerHTML += "<td class='editor_day_name'>" + zeit.DAY_NAMES[d] + "</td>";
 
@@ -207,17 +226,17 @@ if (localStorage.getItem("zeitgeist_last_save")) {
                 periodElem.innerHTML = template.make("periodInput");
 
                 periodElem.querySelector(".editor_period_name").value = (zeit.config.table && zeit.config.table[w][d].periods[p] ? zeit.config.table[w][d].periods[p].name : "" + d + p);
-                periodElem.querySelector(".editor_period_time").value = (zeit.config.table && zeit.config.table[w][d].periods[p] ? zeit.config.table[w][d].periods[p].time : null);
-                if (zeit.config.table && zeit.config.table[w][d].periods[p] && zeit.config.table[w][d].periods[p].enable === false) {
-                    periodElem.querySelector(".editor_period_enable").checked = false;
-                } else {
-                    periodElem.querySelector(".editor_period_enable").checked = true;
-                }
+                // periodElem.querySelector(".editor_period_time").value = (zeit.config.table && zeit.config.table[w][d].periods[p] ? zeit.config.table[w][d].periods[p].time : null);
+                // if (zeit.config.table && zeit.config.table[w][d].periods[p] && zeit.config.table[w][d].periods[p].enable === false) {
+                //     periodElem.querySelector(".editor_period_enable").checked = false;
+                // } else {
+                //     periodElem.querySelector(".editor_period_enable").checked = true;
+                // }
 
                 dayElem.appendChild(periodElem);
 
-                setRequired(periodElem);
-                setTimeMin(periodElem);
+                // setRequired(periodElem);
+                // setTimeMin(periodElem);
             }
             weekElem.appendChild(dayElem);
         }
@@ -229,10 +248,10 @@ if (localStorage.getItem("zeitgeist_last_save")) {
         var parent = input.parentElement;
 
         if (input.classList.contains("editor_period_name")) {
-            setRequired(periodElem);
+            // setRequired(periodElem);
         } else if (input.classList.contains("editor_period_time")) {
             console.log("time changed");
-            setTimeMin(parent.parentElement.children[[].slice.call(parent.parentElement.children).indexOf(parent) + 1]);
+            // setTimeMin(parent.parentElement.children[[].slice.call(parent.parentElement.children).indexOf(parent) + 1]);
         }
     });
 
@@ -277,13 +296,11 @@ if (localStorage.getItem("zeitgeist_last_save")) {
                         var tds = row.querySelectorAll(".editor_period");
                         tds.each(function(elem){
                             var nameInput = elem.querySelector(".editor_period_name");
-                            var timeInput = elem.querySelector(".editor_period_time");
-                            var enableInput = elem.querySelector(".editor_period_enable");
+                            var timeInput = document.querySelectorAll(".editor_time")[i];
 
                             var period = {
                                 time: timeInput.value,
-                                name: nameInput.value,
-                                enable: enableInput.checked
+                                name: nameInput.value
                             };
 
                             day.periods.push(period);
